@@ -3,7 +3,7 @@ import type { Event } from "../types";
 import { MapPin, Settings, Users } from "lucide-react";
 
 interface EventCardProps {
-  event: Event;
+  event: Partial<Event>;
 }
 
 const progressPercentage = (reg: number, cap: number): number => {
@@ -11,27 +11,37 @@ const progressPercentage = (reg: number, cap: number): number => {
   return Math.min(100, Math.round((reg / cap) * 100));
 };
 
+const formatDate = (d?: string | Date | null): string => {
+  if (!d) return "";
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const pct = progressPercentage(event.registrations, event.capacity);
+  const pct = progressPercentage(event.totalRegistrations || 0, event.capacity || 0);
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 bg-white border border-gray-200 rounded-xl shadow-sm p-4 lg:p-5 mb-5 hover:shadow-md transition-shadow">
-      <div className="flex-1 flex flex-col justify-between gap-5 w-full">
+    <div className="flex flex-col items-start justify-between gap-5 p-4 mb-5 transition-shadow bg-white border border-gray-200 shadow-sm lg:flex-row lg:items-center rounded-xl lg:p-5 hover:shadow-md">
+      <div className="flex flex-col justify-between flex-1 w-full gap-5">
         {/* Event Info */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <h3 className="text-base font-semibold m-0 text-gray-900">
-            {event.title}
+          <h3 className="m-0 text-base font-semibold text-gray-900">
+            {event.name}
           </h3>
           <span
             className={`text-xs font-medium rounded-full px-2.5 py-1 capitalize ${
               event.status === "completed"
                 ? "bg-green-50 text-green-600"
-                : "bg-blue-50 text-blue-600"
-            }`}
+                : "bg-blue-50 text-blue-600"}`}
           >
             {event.status}
           </span>
-          {event.isLive && (
+          {event.date === Date() && (
             <span className="text-xs font-medium rounded-full px-2.5 py-1 bg-red-50 text-red-600">
               ● Live
             </span>
@@ -39,24 +49,24 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         </div>
 
         {/* Event Meta */}
-        <div className="flex flex-wrap items-center justify-between w-full lg:w-4/5 gap-3">
+        <div className="flex flex-wrap items-center justify-between w-full gap-3 lg:w-4/5">
           <div className="flex items-center text-[13px] text-gray-500 gap-1">
-            📅 {new Date(event.date).toLocaleDateString()}
+            📅 {formatDate(event.date)}
           </div>
           <div className="flex items-center text-[13px] text-gray-500 gap-1">
-            <MapPin width={16} height={16} /> {event.location}
+            <MapPin width={16} height={16} /> {event.venue}
           </div>
-          <div className="flex items-center text-sm text-gray-700 font-semibold gap-1">
+          <div className="flex items-center gap-1 text-sm font-semibold text-gray-700">
             <Users width={16} height={16} />
-            {event.registrations} / {event.capacity}
+            {event.totalRegistrations} / {event.capacity}
           </div>
         </div>
 
         {/* Progress Bar */}
         <div className="mt-3.5">
-          <div className="bg-gray-100 h-2 rounded-full overflow-hidden">
+          <div className="h-2 overflow-hidden bg-gray-100 rounded-full">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-300"
+              className="h-full transition-all duration-300 bg-blue-600 rounded-full"
               style={{ width: `${pct}%` }}
               aria-valuenow={pct}
               aria-valuemin={0}
@@ -70,11 +80,14 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       </div>
 
       {/* Actions */}
-      <div className="w-full lg:w-auto flex lg:block justify-end">
-        <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+      <div className="flex justify-end w-full lg:w-auto lg:block">
+        <a
+          href={`/dashboard/manage-event/${event.id ?? ""}`}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+        >
           <Settings width={16} height={16} />
           Manage
-        </button>
+        </a>
       </div>
     </div>
   );

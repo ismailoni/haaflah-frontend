@@ -9,8 +9,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('haaflah_token');
+    const storedUser = localStorage.getItem('haaflah_user');
     
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -23,16 +23,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const response = await api.login({ email, password });
     setToken(response.token);
     setUser(response.user);
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('haaflah_token', response.token);
+    localStorage.setItem('haaflah_user', JSON.stringify(response.user));
   };
 
   const register = async (data: api.RegisterData) => {
     const response = await api.register(data);
     setToken(response.token);
     setUser(response.user);
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('haaflah_token', response.token);
+    localStorage.setItem('haaflah_user', JSON.stringify(response.user));
   };
 
   const logout = async () => {

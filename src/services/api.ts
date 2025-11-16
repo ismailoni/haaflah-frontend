@@ -1,8 +1,6 @@
-import userData from "../data/user.json";
-import eventsData from "../data/events.json";
-import type { User, Event } from "../types";
 
-const wait = (ms = 300) => new Promise((res) => setTimeout(res, ms));
+import type { User } from "../types";
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -16,7 +14,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  role?: 'organizer' | 'vendor';
+  role?: 'organizer';
 }
 
 export interface AuthResponse {
@@ -85,7 +83,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
 }
 
 export async function logout(): Promise<void> {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('haaflah_token');
   if (token) {
     await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
@@ -97,14 +95,4 @@ export async function logout(): Promise<void> {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
-}
-
-export async function fetchUser(): Promise<User> {
-  await wait(150);
-  return userData as User;
-}
-
-export async function fetchEventsByOrganizer(organizerId: string): Promise<Event[]> {
-  await wait(250);
-  return (eventsData as Event[]).filter((e) => e.organizerId === organizerId);
 }

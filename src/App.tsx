@@ -9,6 +9,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { useAuth } from "./hooks/useAuth";
+import ManageEvent from "./pages/ManageEventPage";
 
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -46,7 +47,7 @@ function App() {
         }
       />
       <Route
-        path="/dashboard/registration-demo"
+        path="/register/:eventId"
         element={
           <PrivateRoute>
             <RegistrationPage />
@@ -58,6 +59,14 @@ function App() {
         element={
           <PrivateRoute>
             <CreateEvent />
+          </PrivateRoute>
+        }
+      />
+
+      <Route path="/dashboard/manage-event/:id"
+        element={
+          <PrivateRoute>
+            <ManageEvent />
           </PrivateRoute>
         }
       />
