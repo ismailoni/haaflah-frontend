@@ -1,6 +1,7 @@
 import React from "react";
 import type { Event } from "../types";
 import { MapPin, Settings, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface EventCardProps {
   event: Partial<Event>;
@@ -81,13 +82,13 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
       {/* Actions */}
       <div className="flex justify-end w-full lg:w-auto lg:block">
-        <a
-          href={`/dashboard/manage-event/${event.id ?? ""}`}
+        <Link
+          to={`/dashboard/manage-event/${event.id ?? ""}`}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <Settings width={16} height={16} />
           Manage
-        </a>
+        </Link>
       </div>
     </div>
   );
