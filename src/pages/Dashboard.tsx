@@ -24,7 +24,7 @@ interface DashboardEvent {
 
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<OrganizerStats | null>(null);
+  const [, setStats] = useState<OrganizerStats | null>(null);
   const [recentEvents, setRecentEvents] = useState<DashboardEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 

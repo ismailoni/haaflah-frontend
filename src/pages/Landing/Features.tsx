@@ -49,10 +49,11 @@ const cardVariants = {
     transition: {
       delay: i * 0.15,
       duration: 0.6,
-      ease: "easeOut",
+      // use numeric bezier easing to satisfy TS framer-motion types
+      ease: [0.25, 0.1, 0.25, 1],
     },
   }),
-};
+} as unknown as import("framer-motion").Variants;
 
 function Features() {
   return (
