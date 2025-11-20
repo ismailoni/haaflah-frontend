@@ -9,6 +9,7 @@ import { getMyStats } from "../services/statsService";
 import { useNavigate } from "react-router-dom";
 import type { OrganizerStats } from "../types";
 import { Link } from "react-router-dom";
+import { toast, Toaster} from 'sonner';
 
 interface DashboardEvent {
   id: string;
@@ -40,7 +41,9 @@ const Dashboard: React.FC = () => {
         setRecentEvents(data.recentEvents || []);
         setUser(authUser);
       } catch (err) {
+        toast.error('Failed to Load Stats')
         console.error("Failed to load stats:", err);
+
       } finally {
         setLoading(false);
       }
@@ -222,6 +225,8 @@ const Dashboard: React.FC = () => {
           )}
         </section>
       </div>
+
+      <Toaster richColors position="top-right" />
     </div>
   );
 };
