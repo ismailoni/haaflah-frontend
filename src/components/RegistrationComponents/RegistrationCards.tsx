@@ -15,7 +15,9 @@ interface RegistrationCardsProps {
 
 const RegistrationCards: React.FC<RegistrationCardsProps> = ({ event }) => {
   const [progress, setProgress] = useState(0);
-
+  
+  const remainingSpots: number | string =
+    event.capacity == null ? "Unlimited" : Math.max(0, event.capacity - event.totalRegistrations);
   // Example: Animate progress from 0 to 100
   useEffect(() => {
     const interval = setInterval(() => {
@@ -46,7 +48,7 @@ const RegistrationCards: React.FC<RegistrationCardsProps> = ({ event }) => {
             <p className="text-gray-800">Capacity</p>
             <div className="flex justify-between space-y-1">
               <p>{event.totalRegistrations} registered</p>
-              <p>{event.capacity - event.totalRegistrations} spots left</p>
+              <p>{remainingSpots} spots left</p>
             </div>
             <ProgressBar value={progress} color="bg-blue-600" height="h-2.5" />
           </div>

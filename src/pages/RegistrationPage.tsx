@@ -55,7 +55,8 @@ const Registration: React.FC = () => {
     );
   }
 
-  const remainingSpots = event.capacity - event.totalRegistrations;
+  const remainingSpots: number | string =
+    event.capacity == null ? "Unlimited" : Math.max(0, event.capacity - event.totalRegistrations);
 
   return (
     <section className="min-h-screen px-5 py-8 font-nunito bg-blue-50 sm:px-8 lg:px-10">

@@ -59,7 +59,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           </div>
           <div className="flex items-center gap-1 text-sm font-semibold text-gray-700">
             <Users width={16} height={16} />
-            {event.totalRegistrations} / {event.capacity}
+            {event.totalRegistrations} / {event.capacity === 0 ? "unlimited" : event.capacity}
           </div>
         </div>
 

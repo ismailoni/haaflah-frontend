@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createEvent } from "../services/eventsService";
 import type { EventFormData, ValidationErrors } from "../types/event";
+import type { Event } from "../types"; // Used for payload shape mapping
 import { defaultEventFormData } from "../types/event";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -89,10 +90,23 @@ const CreateEvent: React.FC = () => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem("haaflah_token") ?? undefined;
-      const res = await createEvent(
-        form as unknown as Record<string, unknown>,
-        token
-      );
+      // Map form state to backend expected keys. Avoid filtering out 0 capacity.
+      // Assumption: backend expects hasFaceIdCheckIn & hasLiveStream field names.
+      // Provide a default eventType (physical) if the backend requires it.
+      const payload: Partial<Event> = {
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+        bannerUrl: form.bannerUrl || undefined,
+        date: form.date,
+        time: form.time,
+        venue: form.venue.trim(),
+        capacity: form.capacity === null ? undefined : form.capacity, // preserve 0
+        registrationDeadline: form.registrationDeadline || undefined,
+        hasFaceIdCheckIn: form.faceIdCheckIn,
+        hasLiveStream: form.liveStreaming
+      };
+
+      const res = await createEvent(payload, token);
 
       if (res.status === 201) {
         toast.success("🎉 Event created successfully!");
