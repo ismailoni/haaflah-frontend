@@ -49,9 +49,7 @@ function App() {
       <Route
         path="/register/:eventId"
         element={
-          <PrivateRoute>
             <RegistrationPage />
-          </PrivateRoute>
         }
       />
       <Route
