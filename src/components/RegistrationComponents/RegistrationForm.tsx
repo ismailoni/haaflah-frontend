@@ -2,6 +2,16 @@ import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { registerParticipant } from "../../services/participantService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Check } from "lucide-react";
 
 
 interface FormData {
@@ -29,6 +39,8 @@ const RegistrationForm: React.FC<RegisterFormProps> = ({ eventId }) => {
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [loading, setLoading] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [registeredName, setRegisteredName] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -86,6 +98,10 @@ const RegistrationForm: React.FC<RegisterFormProps> = ({ eventId }) => {
     try {
       await registerParticipant(eventId, formData);
 
+      // capture name before reset so modal can show it
+      const name = `${formData.firstName} ${formData.lastName}`.trim();
+      setRegisteredName(name || null);
+      setIsSuccessOpen(true);
 
       toast.success("🎉 Registration successful!");
       setFormData({
@@ -98,7 +114,6 @@ const RegistrationForm: React.FC<RegisterFormProps> = ({ eventId }) => {
       });
       setErrors({});
     } catch (err: unknown) {
-      console.error(err);
       // Safely extract an error message from different shapes (Axios, Error, string, etc.)
       const getErrorMessage = (error: unknown): string => {
         if (typeof error === "string") return error;
@@ -300,6 +315,29 @@ const RegistrationForm: React.FC<RegisterFormProps> = ({ eventId }) => {
           )}
         </button>
       </form>
+
+      {/* Success Modal */}
+      <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <Check className="w-6 h-6 text-green-600" />
+              <DialogTitle>Registration Successful</DialogTitle>
+            </div>
+            <DialogDescription>
+              {registeredName
+                ? `Thanks ${registeredName}! You're registered for this event.`
+                : "You're registered for this event."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="default" onClick={() => setIsSuccessOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

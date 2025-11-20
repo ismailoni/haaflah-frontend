@@ -63,13 +63,19 @@ export const checkInParticipant = async (id: string, token?: string) => {
   return res;
 };
 
-// bulk check-in (protected) - expects body like { participantIds: [...] } or similar
+// bulk check-in (protected) - backend expects an object { ids: ["id1", "id2", ...] }
+// Accept a string array and wrap it for the API.
 export const bulkCheckIn = async (
-  payload: Record<string, unknown>,
+  ids: string[],
   token?: string
 ) => {
-  const res = await axios.post(`${API_URL}/participants/bulk-check-in`, payload, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  const uniqueIds = Array.from(new Set(ids));
+  const res = await axios.post(
+    `${API_URL}/participants/bulk-check-in`,
+    { ids: uniqueIds },
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }
+  );
   return res;
 };

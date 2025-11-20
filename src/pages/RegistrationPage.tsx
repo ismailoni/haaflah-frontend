@@ -13,7 +13,7 @@ interface EventData {
   time?: string;
   venue: string;
   capacity: number;
-  registeredCount: number;
+  totalRegistrations: number;
 }
 
 const Registration: React.FC = () => {
@@ -55,7 +55,7 @@ const Registration: React.FC = () => {
     );
   }
 
-  const remainingSpots = event.capacity - event.registeredCount;
+  const remainingSpots = event.capacity - event.totalRegistrations;
 
   return (
     <section className="min-h-screen px-5 py-8 font-nunito bg-blue-50 sm:px-8 lg:px-10">

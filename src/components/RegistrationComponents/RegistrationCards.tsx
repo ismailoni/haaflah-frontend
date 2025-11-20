@@ -8,7 +8,7 @@ interface RegistrationCardsProps {
     date: string;
     venue: string;
     capacity: number;
-    registeredCount: number;
+    totalRegistrations: number;
   };
 }
 
@@ -45,8 +45,8 @@ const RegistrationCards: React.FC<RegistrationCardsProps> = ({ event }) => {
           <div className="text-sm text-gray-500 space-y-0.5 md:text-base">
             <p className="text-gray-800">Capacity</p>
             <div className="flex justify-between space-y-1">
-              <p>{event.registeredCount} registered</p>
-              <p>{event.capacity - event.registeredCount} spots left</p>
+              <p>{event.totalRegistrations} registered</p>
+              <p>{event.capacity - event.totalRegistrations} spots left</p>
             </div>
             <ProgressBar value={progress} color="bg-blue-600" height="h-2.5" />
           </div>
@@ -73,7 +73,7 @@ const RegistrationCards: React.FC<RegistrationCardsProps> = ({ event }) => {
             </p>
             <p className="flex items-center gap-2 ">
               <CircleCheckBig size={18} color="green" />
-              Fast Check-in wuth Face ID (optional)
+              Fast Check-in with Face ID (optional)
             </p>
           </div>
         </div>

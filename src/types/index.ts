@@ -100,7 +100,8 @@ export interface PlatformStats {
 export interface Participant {
   id: string;
   eventId: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   registrationDate: string;
   checkedIn: boolean;
