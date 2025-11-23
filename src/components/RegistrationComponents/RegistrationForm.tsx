@@ -1,6 +1,18 @@
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { registerParticipant } from "../../services/participantService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Check } from "lucide-react";
+
 
 interface FormData {
   firstName: string;
@@ -10,8 +22,12 @@ interface FormData {
   organisation?: string;
   faceIdEnabled?: boolean;
 }
+interface RegisterFormProps {
+  eventId: string;
+}
 
-const RegisterForm: React.FC = () => {
+const RegistrationForm: React.FC<RegisterFormProps> = ({ eventId }) => {
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -23,14 +39,16 @@ const RegisterForm: React.FC = () => {
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [loading, setLoading] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [registeredName, setRegisteredName] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleFaceIdToggle = (): void => {
+  const handleFaceIdToggle = () => {
     setFormData((prev) => ({
       ...prev,
       faceIdEnabled: !prev.faceIdEnabled,
@@ -42,28 +60,25 @@ const RegisterForm: React.FC = () => {
     );
   };
 
-  // ✅ Validate form fields
   const validate = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
     if (!formData.firstName.trim())
       newErrors.firstName = "First name is required";
-
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-
-    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.lastName.trim())
+      newErrors.lastName = "Last name is required";
+    if (!formData.email.trim())
+      newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Invalid email address";
-
     if (!formData.phoneNumber.trim())
       newErrors.phoneNumber = "Phone number is required";
     else if (formData.phoneNumber.length < 7)
       newErrors.phoneNumber = "Enter a valid phone number";
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fix all required fields");
       return false;
     }
 
@@ -74,15 +89,21 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
 
     if (!validate()) return;
+    if (!eventId) {
+      toast.error("Invalid event link");
+      return;
+    }
 
     setLoading(true);
     try {
-      // Simulate async submission
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await registerParticipant(eventId, formData);
+
+      // capture name before reset so modal can show it
+      const name = `${formData.firstName} ${formData.lastName}`.trim();
+      setRegisteredName(name || null);
+      setIsSuccessOpen(true);
 
       toast.success("🎉 Registration successful!");
-      console.log("Registration Data:", formData);
-
       setFormData({
         firstName: "",
         lastName: "",
@@ -92,8 +113,26 @@ const RegisterForm: React.FC = () => {
         faceIdEnabled: false,
       });
       setErrors({});
-    } catch {
-      toast.error("Something went wrong. Try again!");
+    } catch (err: unknown) {
+      // Safely extract an error message from different shapes (Axios, Error, string, etc.)
+      const getErrorMessage = (error: unknown): string => {
+        if (typeof error === "string") return error;
+        if (error instanceof Error) return error.message;
+        if (typeof error === "object" && error !== null && "response" in error) {
+          const resp = (error as { response?: unknown }).response;
+          if (typeof resp === "object" && resp !== null && "data" in resp) {
+            const data = (resp as { data?: unknown }).data;
+            if (typeof data === "object" && data !== null && "message" in data) {
+              const msg = (data as { message?: unknown }).message;
+              return typeof msg === "string" ? msg : String(msg);
+            }
+          }
+        }
+        return "Failed to register. Try again.";
+      };
+
+      const message = getErrorMessage(err);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -101,30 +140,29 @@ const RegisterForm: React.FC = () => {
 
   return (
     <section className="flex items-center justify-center min-h-screen lg:w-3/5">
-      {/* Toast Container */}
       <ToastContainer position="top-right" autoClose={2500} />
 
       <form
         onSubmit={handleSubmit}
-        className="w-full bg-white rounded-xl shadow p-5 sm:p-7"
+        className="w-full p-5 bg-white shadow rounded-xl sm:p-7"
       >
         <div className="mb-8">
           <h2 className="font-semibold text-gray-800 md:text-lg">
             Event Registration
           </h2>
-          <p className="text-gray-500 text-sm md:text-base">
+          <p className="text-sm text-gray-500 md:text-base">
             Fill in your details to register for this event
           </p>
         </div>
 
-        <p className="mb-4 semibold text-gray-700 md:text-lg">
+        <p className="mb-4 text-gray-700 semibold md:text-lg">
           Personal Information
         </p>
 
+        {/* First + Last Name */}
         <div className="md:flex md:gap-4">
-          {/* First Name */}
           <div className="mb-4 md:w-full">
-            <label className="block text-sm font-semibold mb-1">
+            <label className="block mb-1 text-sm font-semibold">
               First Name *
             </label>
             <input
@@ -140,15 +178,14 @@ const RegisterForm: React.FC = () => {
               }`}
             />
             {errors.firstName && (
-              <p className="text-red-500 text-xs mt-1 animate-pulse">
+              <p className="mt-1 text-xs text-red-500 animate-pulse">
                 {errors.firstName}
               </p>
             )}
           </div>
 
-          {/* Last Name */}
           <div className="mb-4 md:w-full">
-            <label className="block text-sm font-semibold mb-1">
+            <label className="block mb-1 text-sm font-semibold">
               Last Name *
             </label>
             <input
@@ -164,7 +201,7 @@ const RegisterForm: React.FC = () => {
               }`}
             />
             {errors.lastName && (
-              <p className="text-red-500 text-xs mt-1 animate-pulse">
+              <p className="mt-1 text-xs text-red-500 animate-pulse">
                 {errors.lastName}
               </p>
             )}
@@ -173,7 +210,7 @@ const RegisterForm: React.FC = () => {
 
         {/* Email */}
         <div className="mb-4">
-          <label className="block text-sm font-semibold mb-1">
+          <label className="block mb-1 text-sm font-semibold">
             Email Address *
           </label>
           <input
@@ -189,15 +226,15 @@ const RegisterForm: React.FC = () => {
             }`}
           />
           {errors.email && (
-            <p className="text-red-500 text-xs mt-1 animate-pulse">
+            <p className="mt-1 text-xs text-red-500 animate-pulse">
               {errors.email}
             </p>
           )}
         </div>
 
-        {/* Phone Number */}
+        {/* Phone */}
         <div className="mb-4">
-          <label className="block text-sm font-semibold mb-1">
+          <label className="block mb-1 text-sm font-semibold">
             Phone Number *
           </label>
           <input
@@ -205,7 +242,7 @@ const RegisterForm: React.FC = () => {
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
-            placeholder="+1 555 0123"
+            placeholder="+234 801 234 5678"
             className={`w-full border ${
               errors.phoneNumber ? "border-red-500" : "border-gray-300"
             } rounded-lg text-sm p-2 focus:outline-none focus:ring ${
@@ -213,7 +250,7 @@ const RegisterForm: React.FC = () => {
             }`}
           />
           {errors.phoneNumber && (
-            <p className="text-red-500 text-xs mt-1 animate-pulse">
+            <p className="mt-1 text-xs text-red-500 animate-pulse">
               {errors.phoneNumber}
             </p>
           )}
@@ -221,7 +258,7 @@ const RegisterForm: React.FC = () => {
 
         {/* Organisation */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">
+          <label className="block mb-1 text-sm font-semibold">
             Organisation (Optional)
           </label>
           <input
@@ -230,24 +267,21 @@ const RegisterForm: React.FC = () => {
             value={formData.organisation}
             onChange={handleChange}
             placeholder="Your company or organisation"
-            className="w-full border border-gray-300 rounded-lg text-sm p-2 focus:outline-none focus:ring focus:ring-blue-500"
+            className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
           />
         </div>
-
-        <div className="w-full h-[0.5px] bg-gray-300 my-6 sm:my-8"></div>
 
         {/* Face ID Toggle */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <label className="block text-sm font-medium mb-1 md:text-base">
+            <label className="block mb-1 text-sm font-medium md:text-base">
               Face ID Check-in (Optional)
             </label>
-            <p className="text-gray-500 text-xs md:text-sm">
+            <p className="text-xs text-gray-500 md:text-sm">
               Enable fast and secure check-in at the venue
             </p>
           </div>
 
-          {/* Face ID Check Toggle Switch */}
           <button
             type="button"
             onClick={handleFaceIdToggle}
@@ -263,7 +297,7 @@ const RegisterForm: React.FC = () => {
           </button>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
@@ -273,7 +307,7 @@ const RegisterForm: React.FC = () => {
         >
           {loading ? (
             <>
-              <span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span className="border-2 border-white rounded-full size-4 border-t-transparent animate-spin"></span>
               <span>Processing...</span>
             </>
           ) : (
@@ -281,8 +315,31 @@ const RegisterForm: React.FC = () => {
           )}
         </button>
       </form>
+
+      {/* Success Modal */}
+      <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <Check className="w-6 h-6 text-green-600" />
+              <DialogTitle>Registration Successful</DialogTitle>
+            </div>
+            <DialogDescription>
+              {registeredName
+                ? `Thanks ${registeredName}! You're registered for this event.`
+                : "You're registered for this event."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="default" onClick={() => setIsSuccessOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
 
-export default RegisterForm;
+export default RegistrationForm;

@@ -4,10 +4,11 @@
 export interface EventFormData {
   name: string;
   description: string;
+  bannerUrl?: string;
   date: string; // ISO date (yyyy-mm-dd)
   time: string; // 24-hour time (HH:MM)
   venue: string;
-  expectedAttendees?: number | null;
+  capacity?: number | null;
   registrationDeadline?: string | null; // ISO date
   faceIdCheckIn: boolean;
   liveStreaming: boolean;
@@ -23,7 +24,7 @@ export const defaultEventFormData: EventFormData = {
   date: '',
   time: '',
   venue: '',
-  expectedAttendees: null,
+  capacity: null,
   registrationDeadline: null,
   faceIdCheckIn: false,
   liveStreaming: false,
