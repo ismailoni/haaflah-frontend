@@ -35,6 +35,7 @@ const Navbar: React.FC = () => {
   const navItems: NavItem[] = [
     { id: "home", label: "Home" },
     { id: "features", label: "Features" },
+    { id: "doc", label: "Docs" },
     { id: "product", label: "Product" },
     { id: "team", label: "Team" },
     { id: "faq", label: "FAQ" },
@@ -42,9 +43,8 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed w-full top-0 left-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md" : "bg-transparent"
-      }`}
+      className={`fixed w-full top-0 left-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-transparent"
+        }`}
     >
       <div className="lg:max-w-6xl max-lg:px-5 lg:px-6 mx-auto py-4 flex justify-between items-center">
         {/* Logo */}
@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
           href="/"
           className="text-4xl flex items-center gap-5 text-[#0C1421] font-bold satisfy-regular"
         >
-          <img src={Logo} alt="" className=" h-10"/>
+          <img src={Logo} alt="" className=" h-10" />
           Haaflah
         </a>
 
@@ -61,12 +61,11 @@ const Navbar: React.FC = () => {
           {navItems.map((item) => (
             <li key={item.id}>
               <a
-                href={`#${item.id}`}
-                className={`transition-colors px-3 py-2 rounded-md font-semibold ${
-                  activeSection === item.id
+                href={`${item.id == 'doc' ? '/doc' : `#${item.id}`}`}
+                className={`transition-colors px-3 py-2 rounded-md font-semibold ${activeSection === item.id
                     ? "text-[#0C1421] bg-gray-300"
                     : "text-[#1F2937]"
-                }`}
+                  }`}
               >
                 {item.label}
               </a>
@@ -101,13 +100,12 @@ const Navbar: React.FC = () => {
             {navItems.map((item) => (
               <li key={item.id}>
                 <a
-                  href={`#${item.id}`}
+                  href={`${item.id == 'doc' ? '/doc' : `#${item.id}`}`}
                   onClick={() => setIsOpen(false)}
-                  className={`block transition-colors px-3 py-2 rounded-sm font-semibold ${
-                    activeSection === item.id
+                  className={`block transition-colors px-3 py-2 rounded-sm font-semibold ${activeSection === item.id
                       ? "text-[] bg-gray-300"
                       : "text-[#1F2937]"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </a>
